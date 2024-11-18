@@ -216,6 +216,7 @@ const GenreList: React.FC<Props> = ({ genres }) => {
       {genres.map((genre) => {
         return (
           <Text
+            key={genre.id}
             style={{
               borderRadius: 24,
               borderColor: "#fff",
