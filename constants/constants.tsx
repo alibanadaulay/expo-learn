@@ -1,0 +1,7 @@
+export const STORAGE_KEYS = {
+  USER_TOKEN: "USER_TOKEN",
+  USER_PROFILE: "USER_PROFILE",
+  USER_LOGIN_AT: "USER_LOGIN_AT",
+};
+
+export const API_URL = process.env.EXPO_PUBLIC_API_URL;
