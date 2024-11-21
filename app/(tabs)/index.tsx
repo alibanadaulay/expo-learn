@@ -1,27 +1,36 @@
-import { Text, View } from "react-native";
-import { useEffect } from "react";
-import checkIfExpired from "@/hooks/auth/CheckIfExpired";
-import GetPopularMovies from "@/hooks/remote/movies/GetPopularMovies";
-import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
-import { useState } from "react";
+import { View, useColorScheme, StyleSheet } from "react-native";
+import { Colors } from "@/constants/Colors";
+import {
+  GestureHandlerRootView,
+  ScrollView,
+} from "react-native-gesture-handler";
 import HorizontalMovieList from "@/components/ui/HorizontalMovieList";
 
 export default function HomeScreen() {
-  const [movies, setMovies] = useState([]);
-
-  useEffect(() => {
-    checkIfExpired();
-    GetPopularMovies()
-      .then((movies) => setMovies(movies))
-      .catch((error) => console.error(error));
-  }, []);
+  const theme = useColorScheme() === "dark" ? Colors.dark : Colors.light;
 
   return (
     <GestureHandlerRootView>
-      <View>
-        <Text>Home Screen</Text>
-        <HorizontalMovieList url="/movie/popular" />
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={styles.scrollView}
+        >
+          <HorizontalMovieList url="/movie/now_playing" title="Now  Playing" />
+          <HorizontalMovieList url="/movie/popular" title="Popular Movies" />
+          <HorizontalMovieList url="/movie/top_rated" title="Top Rated" />
+          <HorizontalMovieList url="/movie/upcoming" title="Upcoming" />
+        </ScrollView>
       </View>
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    height: "100%",
+  },
+  scrollView: {
+    marginTop: "15%",
+  },
+});

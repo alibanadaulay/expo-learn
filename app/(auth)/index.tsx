@@ -15,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import LoginThirdParty from "@/components/ui/LoginThirdParty";
 import { router } from "expo-router";
 import { useAsyncStorage } from "@/hooks/AsynStorage";
-import { API_URL, STORAGE_KEYS } from "@/constants/constants";
+import { STORAGE_KEYS } from "@/constants/constants";
 
 export default function SingInScreen() {
   const theme = useColorScheme() === "dark" ? Colors.dark : Colors.light;

@@ -1,7 +1,17 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native";
+import { Colors } from "@/constants/Colors";
 import React, { useEffect, useState } from "react";
 import GetMoviesByUrl from "@/hooks/remote/movies/GetMoviesByUrl";
 import { FlatList } from "react-native-gesture-handler";
+import { useRouter } from "expo-router";
+import { Rating } from "react-native-ratings";
 
 interface Props {
   url: string;
@@ -14,9 +24,11 @@ const HorizontalMovieList: ({ url, title }: Props) => JSX.Element = ({
   url,
   title = "Popular Movies",
 }) => {
+  const theme = useColorScheme() === "dark" ? Colors.dark : Colors.light;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [movies, setMovies] = useState([]);
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     setLoading(true);
@@ -31,6 +43,9 @@ const HorizontalMovieList: ({ url, title }: Props) => JSX.Element = ({
         setLoading(false);
       });
   }, [url]);
+  const handleClick = ({ id }: { id: number }) => {
+    router.push(`/movies/${id}`);
+  };
 
   if (loading) {
     return (
@@ -50,7 +65,9 @@ const HorizontalMovieList: ({ url, title }: Props) => JSX.Element = ({
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.titleContainer}>{title}</Text>
+        <Text style={[styles.titleContainer, { color: theme.text }]}>
+          {title}
+        </Text>
         <View style={{ flex: 1 }} />
         <TouchableOpacity>
           <Text style={[styles.viewAllText]}>View All</Text>
@@ -58,15 +75,34 @@ const HorizontalMovieList: ({ url, title }: Props) => JSX.Element = ({
       </View>
       <FlatList
         data={movies}
+        keyExtractor={(item) => item.id.toString()}
+        showsHorizontalScrollIndicator={false}
         horizontal={true}
         renderItem={({ item }) => (
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => handleClick({ id: item.id })}>
             <View style={styles.itemContainer}>
               <Image
                 source={{ uri: `${BASE_IMAGE_URL}${item.poster_path}` }}
                 style={styles.image}
               />
-              <Text numberOfLines={1} ellipsizeMode="tail" style={styles.title}>
+
+              <Rating
+                style={{ marginTop: 4 }}
+                tintColor={theme.background}
+                type="star"
+                ratingCount={5}
+                readonly
+                showReadOnlyText={true}
+                imageSize={20}
+                startingValue={
+                  item && item.vote_average ? item.vote_average / 2 : 0
+                }
+              />
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={[styles.title, { color: theme.text }]}
+              >
                 {item.title}
               </Text>
             </View>
@@ -85,6 +121,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 8,
   },
   titleContainer: {
     fontSize: 24,
