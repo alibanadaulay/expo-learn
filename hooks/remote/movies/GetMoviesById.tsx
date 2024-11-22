@@ -12,7 +12,6 @@ const GetMovieById = async (props: Props): Promise<Movie | undefined> => {
     console.log("Movies:", movie);
     return movie;
   } catch (error) {
-    console.error("Error fetching popular movies:", error);
     return undefined;
   }
 };

@@ -11,13 +11,10 @@ interface CastResponse {
 const GetListCastByMovieId = async (props: Props): Promise<Cast[]> => {
   try {
     const url = `movie/${props.movieId}/credits`;
-    const response = await api.get<{ results: CastResponse[] }>(url);
-    response.data.results;
-    console.log("GetListCastByMovieId:", response.data.cast);
-    return response.data.cast; // Return the list of movies
+    const response = await api.get<CastResponse>(url);
+    return response.data.cast;
   } catch (error) {
-    console.error("Error fetching popular movies:", error);
-    return []; // Return an empty array on error
+    return [];
   }
 };
 

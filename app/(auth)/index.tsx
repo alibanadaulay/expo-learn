@@ -69,7 +69,7 @@ export default function SingInScreen() {
         <Text
           style={[
             styles.titleText,
-            { color: theme.text, fontSize: 32, marginTop: "15%" },
+            { color: theme.text, fontSize: 32, marginTop: "10%" },
           ]}
         >
           Login in to MyApp
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   line: {
-    width: "45%",
+    flex: 1,
     height: 1,
     backgroundColor: "#949494",
   },

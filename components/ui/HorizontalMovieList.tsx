@@ -1,7 +1,6 @@
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   TouchableOpacity,
   useColorScheme,
@@ -11,18 +10,23 @@ import React, { useEffect, useState } from "react";
 import GetMoviesByUrl from "@/hooks/remote/movies/GetMoviesByUrl";
 import { FlatList } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
-import { Rating } from "react-native-ratings";
+import MovieComponent from "./MovieComponent";
 
 interface Props {
   url: string;
   title: string;
+  viewAllOnClick: () => void;
 }
 
-const BASE_IMAGE_URL = "https://image.tmdb.org/t/p/w500"; // Adjust size as needed
+const HorizontalMovieList: ({
+  url,
+  title,
 
-const HorizontalMovieList: ({ url, title }: Props) => JSX.Element = ({
+  viewAllOnClick,
+}: Props) => JSX.Element = ({
   url,
   title = "Popular Movies",
+  viewAllOnClick,
 }) => {
   const theme = useColorScheme() === "dark" ? Colors.dark : Colors.light;
   const [loading, setLoading] = useState(true);
@@ -33,8 +37,9 @@ const HorizontalMovieList: ({ url, title }: Props) => JSX.Element = ({
   useEffect(() => {
     setLoading(true);
     GetMoviesByUrl({ url: url })
-      .then((movies) => {
-        setMovies(movies);
+      .then((result) => {
+        console.log("horizontal" + result);
+        setMovies(result.movies);
       })
       .catch((error) => {
         setError(error);
@@ -43,9 +48,6 @@ const HorizontalMovieList: ({ url, title }: Props) => JSX.Element = ({
         setLoading(false);
       });
   }, [url]);
-  const handleClick = ({ id }: { id: number }) => {
-    router.push(`/movies/${id}`);
-  };
 
   if (loading) {
     return (
@@ -69,7 +71,7 @@ const HorizontalMovieList: ({ url, title }: Props) => JSX.Element = ({
           {title}
         </Text>
         <View style={{ flex: 1 }} />
-        <TouchableOpacity>
+        <TouchableOpacity onPress={viewAllOnClick}>
           <Text style={[styles.viewAllText]}>View All</Text>
         </TouchableOpacity>
       </View>
@@ -79,34 +81,45 @@ const HorizontalMovieList: ({ url, title }: Props) => JSX.Element = ({
         showsHorizontalScrollIndicator={false}
         horizontal={true}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handleClick({ id: item.id })}>
-            <View style={styles.itemContainer}>
-              <Image
-                source={{ uri: `${BASE_IMAGE_URL}${item.poster_path}` }}
-                style={styles.image}
-              />
+          <MovieComponent
+            item={{
+              poster_path: item.poster_path,
+              id: item.id,
+              title: item.title,
+              vote_average: item.vote_average,
+              handleClick({ id }: { id: number }) {
+                router.push(`/movies/${id}`);
+              },
+            }}
+          />
+          //   <TouchableOpacity onPress={() => handleClick({ id: item.id })}>
+          //     <View style={styles.itemContainer}>
+          //       <CustomLoadImage
+          //         source={`${BASE_IMAGE_URL}${item.poster_path}`}
+          //         style={styles.image}
+          //       />
 
-              <Rating
-                style={{ marginTop: 4 }}
-                tintColor={theme.background}
-                type="star"
-                ratingCount={5}
-                readonly
-                showReadOnlyText={true}
-                imageSize={20}
-                startingValue={
-                  item && item.vote_average ? item.vote_average / 2 : 0
-                }
-              />
-              <Text
-                numberOfLines={1}
-                ellipsizeMode="tail"
-                style={[styles.title, { color: theme.text }]}
-              >
-                {item.title}
-              </Text>
-            </View>
-          </TouchableOpacity>
+          //       <Rating
+          //         style={{ marginTop: 4 }}
+          //         tintColor={theme.background}
+          //         type="star"
+          //         ratingCount={5}
+          //         readonly
+          //         showReadOnlyText={true}
+          //         imageSize={20}
+          //         startingValue={
+          //           item && item.vote_average ? item.vote_average / 2 : 0
+          //         }
+          //       />
+          //       <Text
+          //         numberOfLines={1}
+          //         ellipsizeMode="tail"
+          //         style={[styles.title, { color: theme.text }]}
+          //       >
+          //         {item.title}
+          //       </Text>
+          //     </View>
+          //   </TouchableOpacity>
         )}
       />
     </View>

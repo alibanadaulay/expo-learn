@@ -1,15 +1,28 @@
 import api from "../Api";
 interface Props {
   url: string;
+  page?: number;
+}
+interface GetMovieResponse {
+  page: number;
+  results: Movie[];
+  total_pages: number;
 }
 
-const GetMoviesByUrl = async (props: Props): Promise<Movie[]> => {
+const GetMoviesByUrl = async ({
+  url,
+  page = 1,
+}: Props): Promise<MoviesPagination> => {
   try {
-    const response = await api.get<{ results: Movie[] }>(props.url);
-    const movies = response.data.results; // Access the results array
-    return movies; // Return the list of movies
+    const urlPage = url + "?page=" + page;
+    const result = await api.get<GetMovieResponse>(urlPage);
+    const movieResponse = result.data;
+    return {
+      movies: movieResponse.results,
+      load_more: page < movieResponse.total_pages,
+    };
   } catch (error) {
-    return []; // Return an empty array on error
+    return { movies: [], load_more: false };
   }
 };
 
