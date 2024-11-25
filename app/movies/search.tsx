@@ -1,41 +1,59 @@
 import {
-  ActivityIndicator,
   View,
   StyleSheet,
-  Text,
   useColorScheme,
-  TouchableOpacity,
+  Text,
+  ActivityIndicator,
 } from "react-native";
-import { useEffect, useState } from "react";
-import GetMoviesByUrl from "@/hooks/remote/movies/GetMoviesByUrl";
-import { FlatList } from "react-native-gesture-handler";
-import { router, useLocalSearchParams } from "expo-router";
-import CustomLoadImage from "@/components/ui/CustomImage";
-import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
+import {
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+} from "react-native-gesture-handler";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+import GetSearchMovie from "@/hooks/remote/movies/SearchMovie";
+import CustomLoadImage from "@/components/ui/CustomImage";
+import { router } from "expo-router";
 
 const BASE_IMAGE_URL = "https://image.tmdb.org/t/p/w1280"; // Adjust size as needed
-export default function MovieList() {
-  const { url, title } = useLocalSearchParams();
-  const [data, setData] = useState<Movie[]>([]);
-  const [page, setPage] = useState(1);
-  const [loadMore, setLoadMore] = useState(true);
-  const [loading, setLoading] = useState(false);
+export default function SearchMovie() {
   const theme = useColorScheme() === "dark" ? Colors.dark : Colors.light;
 
-  useEffect(() => {
-    if (loading) return;
+  const [search, setSearch] = useState(true);
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadMore, setLoadMore] = useState(false);
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+
+  const searcOnClick = () => {
+    setPage(1);
+    setMovies([]);
+    GetMovie();
+  };
+
+  const searchMovie = async () => {
+    if (query.length < 3 || query.trim() === "") {
+      alert("Please enter at least 3 characters");
+      return;
+    }
+    GetMovie();
+  };
+
+  const GetMovie = async () => {
     setLoading(true);
-    GetMoviesByUrl({ url: url.toString(), page })
-      .then((newData) => {
-        setLoadMore(newData.load_more);
-        setData((prev) => [...prev, ...newData.movies]);
+    GetSearchMovie(query, page)
+      .then((result) => {
+        setLoadMore(result.load_more);
+        setMovies((prev) => [...prev, ...result.movies]);
         setLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
         setLoading(false);
       });
-  }, [page]);
+  };
 
   const updatePage = () => {
     if (loadMore && !loading) {
@@ -55,31 +73,44 @@ export default function MovieList() {
     router.push("movies/" + id);
   };
 
-  const back = () => {
-    router.back();
-  };
-
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={back}>
-          <Ionicons name="arrow-back" color={theme.text} size={24} />
+      <View style={styles.headerContainer}>
+        <TouchableOpacity onPress={router.back}>
+          <Ionicons name="arrow-back" color={theme.icon} size={24} />
         </TouchableOpacity>
-        <Text
-          style={[{ color: theme.text, marginHorizontal: 16, fontSize: 24 }]}
-        >
-          {" "}
-          {title}
-        </Text>
+        {search ? (
+          <TextInput
+            style={[styles.textInput, { color: theme.text }]}
+            placeholder="Search Movie...."
+            onSubmitEditing={searchMovie}
+            onChangeText={setQuery}
+            value={query}
+            placeholderTextColor={theme.text}
+          />
+        ) : (
+          <Text style={[styles.headerTitle, { color: theme.text }]}>
+            Search Movie
+          </Text>
+        )}
         <View style={{ flex: 1 }} />
+        <TouchableOpacity onPress={searcOnClick}>
+          <Ionicons name="search" color={theme.icon} size={24} />
+        </TouchableOpacity>
       </View>
+      <View
+        style={{
+          width: "100%",
+          height: 2,
+          marginBottom: 16,
+          backgroundColor: "#C4C4C4",
+        }}
+      />
       <FlatList
-        data={data}
-        style={styles.list}
-        keyExtractor={(item, index) => item.id + "" + index}
+        data={movies}
         onEndReached={updatePage}
         onEndReachedThreshold={0.3}
-        ListFooterComponent={renderProgress}
+        keyExtractor={(item, index) => item.id + "-" + index}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.cardContainer}
@@ -107,23 +138,31 @@ export default function MovieList() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    width: "100%",
-    height: 50,
-    paddingHorizontal: 16,
-    justifyContent: "center",
-    alignContent: "center",
-    alignItems: "center",
-    shadowColor: "#fff", // for iOS shadow
-    shadowOpacity: 0.2, // for iOS shadow
-    shadowRadius: 4,
-  },
-  list: {
-    marginVertical: 16,
-  },
   container: {
+    width: "100%",
     flex: 1,
+  },
+  headerContainer: {
+    flexDirection: "row",
+    height: 50,
+    marginHorizontal: 16,
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: 24,
+    paddingStart: 16,
+  },
+  textInput: {
+    width: "100%",
+    padding: 8,
+    outlineWidth: 0,
+  },
+  bodyContainer: {},
+  footer: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   cardContainer: {
     marginBottom: 20,
@@ -154,7 +193,6 @@ const styles = StyleSheet.create({
     height: 250, // Set desired height
   },
   title: {
-    marginTop: 8,
     fontSize: 24,
   },
   overview: {

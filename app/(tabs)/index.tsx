@@ -1,4 +1,10 @@
-import { View, useColorScheme, StyleSheet } from "react-native";
+import {
+  View,
+  useColorScheme,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+} from "react-native";
 import { Colors } from "@/constants/Colors";
 import {
   GestureHandlerRootView,
@@ -6,6 +12,7 @@ import {
 } from "react-native-gesture-handler";
 import HorizontalMovieList from "@/components/ui/HorizontalMovieList";
 import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function HomeScreen() {
   const theme = useColorScheme() === "dark" ? Colors.dark : Colors.light;
@@ -20,6 +27,10 @@ export default function HomeScreen() {
     { url: upcoming, title: "Upcoming" },
   ];
 
+  const searcOnClick = () => {
+    router.push("/movies/search");
+  };
+
   return (
     <GestureHandlerRootView>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -27,6 +38,23 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
           style={styles.scrollView}
         >
+          <View style={[styles.header, { backgroundColor: theme.background }]}>
+            <Text style={[styles.headerTitle, { color: theme.text }]}>
+              Home
+            </Text>
+            <View style={{ flex: 1 }} />
+            <TouchableOpacity onPress={searcOnClick}>
+              <Ionicons name="search" size={24} color={theme.icon} />
+            </TouchableOpacity>
+          </View>
+          <View
+            style={{
+              width: "100%",
+              backgroundColor: "#fff",
+              height: 2,
+              marginBottom: 16,
+            }}
+          />
           {menu.map(
             (item, index) =>
               item.url && (
@@ -44,14 +72,6 @@ export default function HomeScreen() {
                 />
               )
           )}
-          {/* <HorizontalMovieList
-            url={nowPlaying}
-            title="Now  Playing"
-            viewAllOnClick={() => {}}
-          /> */}
-          {/* <HorizontalMovieList url="/movie/popular" title="Popular Movies" /> */}
-          {/* <HorizontalMovieList url="/movie/top_rated" title="Top Rated" /> */}
-          {/* <HorizontalMovieList url="/movie/upcoming" title="Upcoming" /> */}
         </ScrollView>
       </View>
     </GestureHandlerRootView>
@@ -62,7 +82,18 @@ const styles = StyleSheet.create({
   container: {
     height: "100%",
   },
-  scrollView: {
-    marginTop: "5%",
+  scrollView: {},
+  header: {
+    justifyContent: "flex-start",
+    alignContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    marginVertical: 8,
+    height: 48,
+    paddingHorizontal: 16,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
   },
 });
